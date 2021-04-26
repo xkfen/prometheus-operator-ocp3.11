@@ -1,0 +1,31 @@
+global:
+  resolve_timeout: 5m
+  smtp_smarthost: 'smtp.xx.com:25'
+  smtp_from: 'katy@qq.cn'
+  smtp_auth_username: 'katy@qq.cn'
+  smtp_auth_password: 'xxx'
+  smtp_hello: 'katy'
+  smtp_require_tls: true
+route:
+  group_by: ['namespace']
+  group_wait: 10s
+  group_interval: 50s
+  repeat_interval: 5m
+  receiver: container
+  routes:
+    - receiver: container
+      group_by: ["namespace", "alertname"]
+      match:
+        service: container
+    - receiver: machine
+      match:
+        service: machine
+receivers:
+  - name: 'container'
+    webhook_configs:
+      - url: 'http://<容器告警webhook地址>'
+        send_resolved: false
+  - name: 'machine'
+    webhook_configs:
+      - url: 'http://<节点告警webhook地址>'
+        send_resolved: true

@@ -1,0 +1,49 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  labels:
+    prometheus: k8s
+  name: k8s
+  namespace: openshift-monitoring
+spec:
+  alerting:
+    alertmanagers:
+    - name: alertmanager-main
+      namespace: openshift-monitoring
+      port: web
+  baseImage: quay.io/prometheus/prometheus
+  nodeSelector:
+    beta.kubernetes.io/os: linux
+  podMonitorSelector: {}
+  replicas: 1
+  retention: 3m
+  logLevel: info
+  scrapeInterval: 15s
+  evaluationInterval: 15s
+  enableAdminAPI: true
+  remoteWrite:
+    - url: http://<vminsert-ip>:8480/insert/1/prometheus 
+      queueConfig:
+         capacity: 2000
+         maxSamplesPerSend: 1000
+         maxShards: 30
+         minShards: 10
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: 500m
+    limits:
+      memory: 4Gi
+      cpu: 800m  
+  ruleSelector:
+    matchLabels:
+      prometheus: k8s
+      role: alert-rules
+  securityContext: {}
+    #fsGroup: 2000
+    #runAsNonRoot: true
+    #runAsUser: 1000
+  serviceAccountName: prometheus-k8s
+  serviceMonitorNamespaceSelector: {}
+  serviceMonitorSelector: {}
+  version: v2.17.1

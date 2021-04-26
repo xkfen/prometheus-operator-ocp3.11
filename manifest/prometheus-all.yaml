@@ -1,0 +1,207 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: prometheus-k8s
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - nodes/metrics
+  - nodes
+  - services
+  - endpoints
+  - pods
+  - nodes/proxy
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+    - ""
+  resources:
+    - configmaps
+    - nodes/metrics
+  verbs:
+    - get
+- nonResourceURLs:
+  - /metrics
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus-k8s
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus-k8s
+subjects:
+- kind: ServiceAccount
+  name: prometheus-k8s
+  namespace: openshift-monitoring
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/name: prometheus-operator
+    app.kubernetes.io/version: v0.34.0
+  name: prometheus-operator
+  namespace: openshift-monitoring
+spec:
+  endpoints:
+  - honorLabels: true
+    port: http
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: controller
+      app.kubernetes.io/name: prometheus-operator
+      app.kubernetes.io/version: v0.34.0
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prometheus-k8s-config
+  namespace: openshift-monitoring
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: prometheus-k8s-config
+subjects:
+- kind: ServiceAccount
+  name: prometheus-k8s
+  namespace: openshift-monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+items:
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    name: prometheus-k8s
+    namespace: default
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: prometheus-k8s
+  subjects:
+  - kind: ServiceAccount
+    name: prometheus-k8s
+    namespace: openshift-monitoring
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    name: prometheus-k8s
+    namespace: kube-system
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: prometheus-k8s
+  subjects:
+  - kind: ServiceAccount
+    name: prometheus-k8s
+    namespace: openshift-monitoring
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    name: prometheus-k8s
+    namespace: openshift-monitoring
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: prometheus-k8s
+  subjects:
+  - kind: ServiceAccount
+    name: prometheus-k8s
+    namespace: openshift-monitoring
+kind: RoleBindingList
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: prometheus-k8s-config
+  namespace: openshift-monitoring
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+items:
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: Role
+  metadata:
+    name: prometheus-k8s
+    namespace: default
+  rules:
+  - apiGroups:
+    - ""
+    resources:
+    - services
+    - endpoints
+    - pods
+    verbs:
+    - get
+    - list
+    - watch
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: Role
+  metadata:
+    name: prometheus-k8s
+    namespace: kube-system
+  rules:
+  - apiGroups:
+    - ""
+    resources:
+    - services
+    - endpoints
+    - pods
+    verbs:
+    - get
+    - list
+    - watch
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: Role
+  metadata:
+    name: prometheus-k8s
+    namespace: openshift-monitoring
+  rules:
+  - apiGroups:
+    - ""
+    resources:
+    - services
+    - endpoints
+    - pods
+    verbs:
+    - get
+    - list
+    - watch
+kind: RoleList
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    prometheus: k8s
+  name: prometheus-k8s
+  namespace: openshift-monitoring
+spec:
+  ports:
+  - name: web
+    port: 9090
+    targetPort: web
+  selector:
+    app: prometheus
+    prometheus: k8s
+  sessionAffinity: ClientIP
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus-k8s
+  namespace: openshift-monitoring
+
