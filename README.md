@@ -8,6 +8,7 @@
    如果没有部署prometheus-records，可能会导致在执行oc adm top pod/nodes的时候报错没有值。
 5. alertmanager并不对接告警接收端点用户，而是使用webhook，由负责webhook的服务实现终端用户通知。
 6. alertmanager里面区分了容器告警和节点告警，分别对应不同的webhook服务，如果不需要区分，可以合并。
+7. grafana支持匿名登录，grafana配置文件使用configmap方式挂载到grafana-deployment中，通过NodePort方式暴露30000端口。
 ## 部署
 ### 第一步：创建ns、crd、prometheus-operator、node-exporter sa等
     ````
@@ -27,12 +28,17 @@
    cd manifest
    vim prometheus-prometheus.yaml
    ````
-### 第五步：部署prometheus-operator中的其他组件
+### 第五步：grafana支持匿名登录
+   ````
+   cd grafana
+   kubectl create cm grafana-config --from-file=`pwd`/grafana.ini -n openshift-monitoring
+   ````
+### 第六步：部署prometheus-operator中的其他组件
    ````
    cd manifest
    oc apply -f ./
    ````
-### 第六步：修改alertmanager配置，替换alertmanager/alertmanager.yaml中的<容器告警webhook地址>和<节点告警webhook地址>
+### 第七步：修改alertmanager配置，替换alertmanager/alertmanager.yaml中的<容器告警webhook地址>和<节点告警webhook地址>
    ````
    cd alertmanager
    vim alertmanager.yaml
