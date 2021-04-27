@@ -26,7 +26,7 @@ spec:
     beta.kubernetes.io/os: linux
   replicas: 3
   logLevel: debug
-  securityContext:
+  securityContext: {}
     #fsGroup: 2000
     #runAsNonRoot: true
     #runAsUser: 1000

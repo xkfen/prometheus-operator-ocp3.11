@@ -171,8 +171,8 @@ spec:
             memory: 150Mi
       nodeSelector:
         beta.kubernetes.io/os: linux
-      securityContext:
-        runAsNonRoot: true
+      securityContext: {}
+        #runAsNonRoot: true
         #runAsUser: 65534
       serviceAccountName: kube-state-metrics
 ---
