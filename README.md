@@ -4,7 +4,7 @@
 1. ocp3.11环境是固定的，为了使用prometheus-operator的remote write功能
 2. 默认部署在openshift-monitoring这个ns下
 3. 使用VictoriaMetrics作为prometheus remote write方式，因此需要替换manifest/prometheus-prometheus.yaml中的<vminsert ip>
-4. 使用prometheus-adapter作为hpa组件。因此在执行oc top pod/node的时候则是使用prometheus-adapter服务
+4. 使用prometheus-adapter作为hpa组件。因此在执行oc adm top pod/node的时候则是使用prometheus-adapter服务
 5. 我不需要使用默认的prometheus-rules.yaml中定义的告警规则，因此修改了prometheus-rules.yaml中与alert相关的内容，只保留了与record相关的内容，并整理为prometheus-records.yaml。里面一些record与oc adm top指令相关。
    如果没有部署prometheus-records，可能会导致在执行oc adm top pod/nodes的时候报错没有值。
 5. alertmanager并不对接告警接收端点用户，而是使用webhook，由负责webhook的服务实现终端用户通知。
