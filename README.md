@@ -31,7 +31,7 @@
 ### 第五步：grafana支持匿名登录
    ````
    cd grafana
-   kubectl create cm grafana-config --from-file=`pwd`/grafana.ini -n openshift-monitoring
+   oc create cm grafana-config --from-file=`pwd`/grafana.ini -n openshift-monitoring
    ````
 ### 第六步：部署prometheus-operator中的其他组件
    ````
